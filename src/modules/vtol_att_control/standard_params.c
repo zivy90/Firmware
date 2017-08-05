@@ -84,6 +84,7 @@ PARAM_DEFINE_FLOAT(VT_FWD_THRUST_SC, 0.0f);
  * @group VTOL Attitude Control
  */
 PARAM_DEFINE_FLOAT(VT_B_TRANS_RAMP, 3.0f);
+<<<<<<< HEAD
 
 /**
  * Front transition FW ramp up time
@@ -138,3 +139,5 @@ PARAM_DEFINE_FLOAT(VT_B_REV_DEL, 0.0f);
  * @group VTOL Attitude Control
  */
 PARAM_DEFINE_FLOAT(VT_B_TRANS_THR, 0.0f);
+=======
+>>>>>>> 5f43fde... VTOL control back transition ramp up time
