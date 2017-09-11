@@ -9,8 +9,8 @@
 
 #define PX4_I2C_OBDEV_LED	0x55
 
-#define BOARD_OVERRIDE_UUID "SYSMEMID0000   " // must be of length 16
-#define PX4_SOC_ARCH_ID 0x1000
+#define BOARD_OVERRIDE_UUID "SYSTEMID0000    " // must be of length 16
+#define PX4_SOC_ARCH_ID 0x1001
 
 #define BOARD_HAS_NO_RESET
 #define BOARD_HAS_NO_BOOTLOADER
