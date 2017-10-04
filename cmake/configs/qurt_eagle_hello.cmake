@@ -20,6 +20,7 @@ include(qurt_flags)
 include_directories(${HEXAGON_SDK_INCLUDES})
 
 set(config_module_list
+	drivers/boards
 	drivers/device
 
 	#
