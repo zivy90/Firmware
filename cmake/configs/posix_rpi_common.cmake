@@ -16,6 +16,7 @@ set(config_module_list
 	# Board support modules
 	#
 	drivers/airspeed
+	drivers/boards
 	drivers/device
 	drivers/distance_sensor
 	#drivers/barometer
