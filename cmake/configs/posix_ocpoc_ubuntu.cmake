@@ -17,6 +17,7 @@ set(config_module_list
 	#
 	# Board support modules
 	#
+	drivers/boards
 	drivers/device
 	drivers/distance_sensor
 	modules/sensors
