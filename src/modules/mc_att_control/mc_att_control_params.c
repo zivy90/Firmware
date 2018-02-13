@@ -554,3 +554,33 @@ PARAM_DEFINE_FLOAT(MC_TPA_RATE_I, 0.0f);
  * @group Multicopter Attitude Control
  */
 PARAM_DEFINE_FLOAT(MC_TPA_RATE_D, 0.0f);
+
+/**
+ * Cutoff frequency for the low pass filter on the D-term in the rate controller
+ *
+ * The D-term uses the derivative of the rate and thus is the most susceptible to noise.
+ * Therefore, using a D-term filter allows to decrease the driver-level filtering, which
+ * leads to reduced control latency and permits to increase the P gains.
+ * A value of 0 disables the filter.
+ *
+ * @unit Hz
+ * @min 0
+ * @max 1000
+ * @decimal 0
+ * @increment 10
+ * @group Multicopter Attitude Control
+ */
+PARAM_DEFINE_FLOAT(MC_DTERM_CUTOFF, 0.f);
+
+/**
+ * Multicopter air-mode
+ *
+ * The air-mode enables the mixer to increase or decrease the total thrust of the multirotor
+ * in order to keep attitude and rate control even at low and high throttle.
+ * This function should be disabled during tuning as it will help the controller
+ * to diverge if the closed-loop is unstable.
+ *
+ * @boolean
+ * @group Multicopter Attitude Control
+ */
+PARAM_DEFINE_INT32(MC_AIRMODE, 0);
