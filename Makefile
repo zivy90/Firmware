@@ -48,16 +48,16 @@ endif
 #
 # Example usage:
 #
-# make px4fmu-v2_default 			(builds)
-# make px4fmu-v2_default upload 	(builds and uploads)
-# make px4fmu-v2_default test 		(builds and tests)
+# make px4_fmu-v2_default 			(builds)
+# make px4_fmu-v2_default upload 	(builds and uploads)
+# make px4_fmu-v2_default test 		(builds and tests)
 #
-# This tells cmake to build the nuttx px4fmu-v2 default config in the
-# directory build/nuttx_px4fmu-v2_default and then call make
+# This tells cmake to build the nuttx px4_fmu-v2 default config in the
+# directory build/nuttx_px4_fmu-v2_default and then call make
 # in that directory with the target upload.
 
 #  explicity set default build target
-all: posix_sitl_default
+all: px4_sitl_default
 
 # Parsing
 # --------------------------------------------------------------------
@@ -133,8 +133,9 @@ define colorecho
 +@echo "${COLOR_BLUE}${1} ${NO_COLOR}"
 endef
 
-# Get a list of all config targets cmake/configs/*.cmake
-ALL_CONFIG_TARGETS := $(basename $(shell find "$(SRC_DIR)/cmake/configs" -maxdepth 1 ! -name '*_common*' ! -name '*_sdflight_*' -name '*.cmake' -print | sed  -e 's:^.*/::' | sort))
+# Get a list of all config targets
+ALL_CONFIG_TARGETS := $(shell find boards -maxdepth 3 -mindepth 3 ! -name '*common*' ! -name '*sdflight*' -name '*.cmake' | sed -e 's/boards\///' | sed -e 's/\//_/g' | sed -e 's/\.cmake//' | sort)
+
 # Strip off leading nuttx_
 NUTTX_CONFIG_TARGETS := $(patsubst nuttx_%,%,$(filter nuttx_%,$(ALL_CONFIG_TARGETS)))
 
@@ -154,14 +155,14 @@ $(NUTTX_CONFIG_TARGETS):
 
 all_nuttx_targets: $(NUTTX_CONFIG_TARGETS)
 
-posix: posix_sitl_default
+posix: px4_sitl_default
 broadcast: posix_sitl_broadcast
 
 # All targets with just dependencies but no recipe must either be marked as phony (or have the special @: as recipe).
 .PHONY: all posix broadcast all_nuttx_targets
 
 # Multi- config targets.
-eagle_default: posix_eagle_default qurt_eagle_default
+eagle_default: atlflight_eagle_default atlflight_eagle_defaultqurt
 eagle_rtps: posix_eagle_rtps qurt_eagle_default
 eagle_legacy_default: posix_eagle_legacy qurt_eagle_legacy
 excelsior_default: posix_excelsior_default qurt_excelsior_default
@@ -181,41 +182,41 @@ qgc_firmware: px4fmu_firmware misc_qgc_extra_firmware
 
 # px4fmu NuttX firmware
 px4fmu_firmware: \
-	check_px4io-v2_default \
-	check_px4fmu-v2_default \
-	check_px4fmu-v3_default \
-	check_px4fmu-v4_default \
-	check_px4fmu-v4pro_default \
-	check_px4fmu-v5_default \
+	check_px4_io-v2_default \
+	check_px4_fmu-v2_default \
+	check_px4_fmu-v3_default \
+	check_px4_fmu-v4_default \
+	check_px4_fmu-v4pro_default \
+	check_px4_fmu-v5_default \
 	sizes
 
 misc_qgc_extra_firmware: \
-	check_aerocore2_default \
-	check_aerofc-v1_default \
-	check_auav-x21_default \
-	check_crazyflie_default \
-	check_mindpx-v2_default \
-	check_px4fmu-v2_lpe \
-	check_tap-v1_default \
+	check_gumstix_aerocore2_default \
+	check_intel_aerofc-v1_default \
+	check_auav_x21_default \
+	check_bitcraze_crazyflie_default \
+	check_airmind_mindpx-v2_default \
+	check_px4_fmu-v2_lpe \
+	check_px4_tap-v1_default \
 	sizes
 
 # Other NuttX firmware
 alt_firmware: \
-	check_nxphlite-v3_default \
-	check_px4-same70xplained-v1_default \
-	check_px4-stm32f4discovery_default \
-	check_px4cannode-v1_default \
-	check_px4esc-v1_default \
-	check_px4nucleoF767ZI-v1_default \
-	check_s2740vc-v1_default \
+	check_nxp_hlite-v3_default \
+	check_px4_same70xplained-v1_default \
+	check_px4_stm32f4discovery_default \
+	check_px4_cannode-v1_default \
+	check_px4_esc-v1_default \
+	check_px4_nucleoF767ZI-v1_default \
+	check_px4_s2740vc-v1_default \
 	sizes
 
 # builds with RTPS
 check_rtps: \
-	check_px4fmu-v3_rtps \
-	check_px4fmu-v4_rtps \
-	check_px4fmu-v4pro_rtps \
-	check_posix_sitl_rtps \
+	check_px4_fmu-v3_rtps \
+	check_px4_fmu-v4_rtps \
+	check_px4_fmu-v4pro_rtps \
+	check_px4_posix_rtps \
 	sizes
 
 .PHONY: sizes check quick_check check_rtps uorb_graphs
@@ -224,10 +225,10 @@ sizes:
 	@-find build -name *.elf -type f | xargs size 2> /dev/null || :
 
 # All default targets that don't require a special build environment
-check: check_posix_sitl_default px4fmu_firmware misc_qgc_extra_firmware alt_firmware tests check_format
+check: check_px4_sitl_default px4fmu_firmware misc_qgc_extra_firmware alt_firmware tests check_format
 
 # quick_check builds a single nuttx and posix target, runs testing, and checks the style
-quick_check: check_posix_sitl_default check_px4fmu-v4pro_default tests check_format
+quick_check: check_px4_sitl_default check_px4_fmu-v4pro_default tests check_format
 
 check_%:
 	@echo
@@ -238,14 +239,14 @@ check_%:
 uorb_graphs:
 	@./Tools/uorb_graph/create_from_startupscript.sh
 	@./Tools/uorb_graph/create.py --src-path src --exclude-path src/examples --file Tools/uorb_graph/graph_full
-	@$(MAKE) --no-print-directory px4fmu-v2_default uorb_graph
-	@$(MAKE) --no-print-directory px4fmu-v4_default uorb_graph
-	@$(MAKE) --no-print-directory posix_sitl_default uorb_graph
+	@$(MAKE) --no-print-directory px4_fmu-v2_default uorb_graph
+	@$(MAKE) --no-print-directory px4_fmu-v4_default uorb_graph
+	@$(MAKE) --no-print-directory px4_sitl_default uorb_graph
 
 
 .PHONY: coverity_scan
 
-coverity_scan: posix_sitl_default
+coverity_scan: px4_sitl_default
 
 # Documentation
 # --------------------------------------------------------------------
@@ -282,22 +283,22 @@ format:
 .PHONY: tests tests_coverage tests_mission tests_offboard rostest
 
 tests:
-	@$(MAKE) --no-print-directory posix_sitl_default test_results \
+	@$(MAKE) --no-print-directory px4_sitl_default test_results \
 	ASAN_OPTIONS="color=always:check_initialization_order=1:detect_stack_use_after_return=1" \
 	UBSAN_OPTIONS="color=always"
 
 tests_coverage:
 	@$(MAKE) clean
-	@$(MAKE) --no-print-directory posix_sitl_default PX4_CMAKE_BUILD_TYPE=Coverage
-	@$(MAKE) --no-print-directory posix_sitl_default sitl_gazebo PX4_CMAKE_BUILD_TYPE=Coverage
+	@$(MAKE) --no-print-directory px4_sitl_default PX4_CMAKE_BUILD_TYPE=Coverage
+	@$(MAKE) --no-print-directory px4_sitl_default sitl_gazebo PX4_CMAKE_BUILD_TYPE=Coverage
 	@$(SRC_DIR)/test/rostest_px4_run.sh mavros_posix_tests_missions.test
 	@$(SRC_DIR)/test/rostest_px4_run.sh mavros_posix_tests_offboard_attctl.test
 	@$(SRC_DIR)/test/rostest_px4_run.sh mavros_posix_tests_offboard_posctl.test
-	@$(MAKE) --no-print-directory posix_sitl_default test_coverage_genhtml PX4_CMAKE_BUILD_TYPE=Coverage
-	@echo "Open $(SRC_DIR)/build/posix_sitl_default/coverage-html/index.html to see coverage"
+	@$(MAKE) --no-print-directory px4_sitl_default test_coverage_genhtml PX4_CMAKE_BUILD_TYPE=Coverage
+	@echo "Open $(SRC_DIR)/build/px4_sitl_default/coverage-html/index.html to see coverage"
 
-rostest: posix_sitl_default
-	@$(MAKE) --no-print-directory posix_sitl_default sitl_gazebo
+rostest: px4_sitl_default
+	@$(MAKE) --no-print-directory px4_sitl_default sitl_gazebo
 
 tests_mission: rostest
 	@$(SRC_DIR)/test/rostest_px4_run.sh mavros_posix_tests_missions.test
@@ -308,50 +309,50 @@ tests_offboard: rostest
 
 # static analyzers (scan-build, clang-tidy, cppcheck)
 # --------------------------------------------------------------------
-.PHONY: scan-build posix_sitl_default-clang clang-tidy clang-tidy-fix clang-tidy-quiet cppcheck check_stack
+.PHONY: scan-build px4_sitl_default-clang clang-tidy clang-tidy-fix clang-tidy-quiet cppcheck check_stack
 
 scan-build:
 	@export CCC_CC=clang
 	@export CCC_CXX=clang++
-	@rm -rf $(SRC_DIR)/build/posix_sitl_default-scan-build
+	@rm -rf $(SRC_DIR)/build/px4_sitl_default-scan-build
 	@rm -rf $(SRC_DIR)/build/scan-build/report_latest
-	@mkdir -p $(SRC_DIR)/build/posix_sitl_default-scan-build
-	@cd $(SRC_DIR)/build/posix_sitl_default-scan-build && scan-build cmake $(SRC_DIR) -GNinja -DCONFIG=posix_sitl_default
-	@scan-build -o $(SRC_DIR)/build/scan-build cmake --build $(SRC_DIR)/build/posix_sitl_default-scan-build
+	@mkdir -p $(SRC_DIR)/build/px4_sitl_default-scan-build
+	@cd $(SRC_DIR)/build/px4_sitl_default-scan-build && scan-build cmake $(SRC_DIR) -GNinja -DCONFIG=px4_sitl_default
+	@scan-build -o $(SRC_DIR)/build/scan-build cmake --build $(SRC_DIR)/build/px4_sitl_default-scan-build
 	@find $(SRC_DIR)/build/scan-build -maxdepth 1 -mindepth 1 -type d -exec cp -r "{}" $(SRC_DIR)/build/scan-build/report_latest \;
 
-posix_sitl_default-clang:
-	@mkdir -p $(SRC_DIR)/build/posix_sitl_default-clang
-	@cd $(SRC_DIR)/build/posix_sitl_default-clang && cmake $(SRC_DIR) $(CMAKE_ARGS) -G"$(PX4_CMAKE_GENERATOR)" -DCONFIG=posix_sitl_default -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-	@$(PX4_MAKE) -C $(SRC_DIR)/build/posix_sitl_default-clang
+px4_sitl_default-clang:
+	@mkdir -p $(SRC_DIR)/build/px4_sitl_default-clang
+	@cd $(SRC_DIR)/build/px4_sitl_default-clang && cmake $(SRC_DIR) $(CMAKE_ARGS) -G"$(PX4_CMAKE_GENERATOR)" -DCONFIG=px4_sitl_default -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+	@$(PX4_MAKE) -C $(SRC_DIR)/build/px4_sitl_default-clang
 
-clang-tidy: posix_sitl_default-clang
-	@cd $(SRC_DIR)/build/posix_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -p .
+clang-tidy: px4_sitl_default-clang
+	@cd $(SRC_DIR)/build/px4_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -p .
 
 # to automatically fix a single check at a time, eg modernize-redundant-void-arg
 #  % run-clang-tidy-4.0.py -fix -j4 -checks=-\*,modernize-redundant-void-arg -p .
-clang-tidy-fix: posix_sitl_default-clang
-	@cd $(SRC_DIR)/build/posix_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -fix -p .
+clang-tidy-fix: px4_sitl_default-clang
+	@cd $(SRC_DIR)/build/px4_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -fix -p .
 
 # modified version of run-clang-tidy.py to return error codes and only output relevant results
-clang-tidy-quiet: posix_sitl_default-clang
-	@cd $(SRC_DIR)/build/posix_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -p .
+clang-tidy-quiet: px4_sitl_default-clang
+	@cd $(SRC_DIR)/build/px4_sitl_default-clang && $(SRC_DIR)/Tools/run-clang-tidy.py -header-filter=".*\.hpp" -j$(j) -p .
 
 # TODO: Fix cppcheck errors then try --enable=warning,performance,portability,style,unusedFunction or --enable=all
-cppcheck: posix_sitl_default
+cppcheck: px4_sitl_default
 	@mkdir -p $(SRC_DIR)/build/cppcheck
-	@cppcheck -i$(SRC_DIR)/src/examples --enable=performance --std=c++11 --std=c99 --std=posix --project=$(SRC_DIR)/build/posix_sitl_default/compile_commands.json --xml-version=2 2> $(SRC_DIR)/build/cppcheck/cppcheck-result.xml > /dev/null
+	@cppcheck -i$(SRC_DIR)/src/examples --enable=performance --std=c++11 --std=c99 --std=posix --project=$(SRC_DIR)/build/px4_sitl_default/compile_commands.json --xml-version=2 2> $(SRC_DIR)/build/cppcheck/cppcheck-result.xml > /dev/null
 	@cppcheck-htmlreport --source-encoding=ascii --file=$(SRC_DIR)/build/cppcheck/cppcheck-result.xml --report-dir=$(SRC_DIR)/build/cppcheck --source-dir=$(SRC_DIR)/src/
 
-check_stack: px4fmu-v4pro_default
+check_stack: px4_fmu-v4pro_default
 	@echo "Checking worst case stack usage with checkstack.pl ..."
 	@echo " "
 	@echo "Top 10:"
-	@cd $(SRC_DIR)/build/px4fmu-v4pro_default && mkdir -p stack_usage && arm-none-eabi-objdump -d nuttx_px4fmu-v4pro_default.elf | $(SRC_DIR)/Tools/stack_usage/checkstack.pl arm 0 > stack_usage/checkstack_output.txt 2> stack_usage/checkstack_errors.txt
-	@head -n 10 $(SRC_DIR)/build/px4fmu-v4pro_default/stack_usage/checkstack_output.txt | c++filt
+	@cd $(SRC_DIR)/build/px4_fmu-v4pro_default && mkdir -p stack_usage && arm-none-eabi-objdump -d nuttx_px4_fmu-v4pro_default.elf | $(SRC_DIR)/Tools/stack_usage/checkstack.pl arm 0 > stack_usage/checkstack_output.txt 2> stack_usage/checkstack_errors.txt
+	@head -n 10 $(SRC_DIR)/build/px4_fmu-v4pro_default/stack_usage/checkstack_output.txt | c++filt
 	@echo " "
 	@echo "Symbols with 'main', 'thread' or 'task':"
-	@cat $(SRC_DIR)/build/px4fmu-v4pro_default/stack_usage/checkstack_output.txt | c++filt | grep -E 'thread|main|task'
+	@cat $(SRC_DIR)/build/px4_fmu-v4pro_default/stack_usage/checkstack_output.txt | c++filt | grep -E 'thread|main|task'
 
 # Cleanup
 # --------------------------------------------------------------------

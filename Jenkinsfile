@@ -9,7 +9,7 @@ pipeline {
 
 
           // nuttx default targets that are archived and uploaded to s3
-          for (def option in ["px4fmu-v4", "px4fmu-v4pro", "px4fmu-v5", "aerofc-v1"]) {
+          for (def option in ["px4_fmu-v4", "px4_fmu-v4pro", "px4_fmu-v5", "intel_aerofc-v1"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -22,8 +22,8 @@ pipeline {
                       sh "make distclean"
                       sh "ccache -z"
                       sh "git fetch --tags"
-                      sh "make nuttx_${node_name}_default"
-                      sh "make nuttx_${node_name}_rtps"
+                      sh "make ${node_name}"
+                      sh "make ${node_name}_rtps"
                       sh "make sizes"
                       sh "ccache -s"
                       archiveArtifacts(artifacts: 'build/*/*.px4', fingerprint: true)
@@ -36,7 +36,7 @@ pipeline {
 
 
           // special case for fmu-v2/fmu-v3
-          builds["px4fmu-v2"] = {
+          builds["px4_fmu-v2"] = {
             node {
               stage("Build Test ${node_name}") {
                 docker.image('px4io/px4-dev-nuttx:2017-12-30').inside('-e CCACHE_BASEDIR=$WORKSPACE -v ${CCACHE_DIR}:${CCACHE_DIR}:rw') {
@@ -46,11 +46,11 @@ pipeline {
                     sh "make distclean"
                     sh "ccache -z"
                     sh "git fetch --tags"
-                    sh "make px4io-v2_default"
-                    sh "make nuttx_px4fmu-v2_default"
-                    sh "make nuttx_px4fmu-v2_lpe"
-                    sh "make nuttx_px4fmu-v3_default"
-                    sh "make nuttx_px4fmu-v3_rtps"
+                    sh "make px4_io-v2"
+                    sh "make px4_fmu-v2"
+                    sh "make px4_fmu-v2_lpe"
+                    sh "make px4_fmu-v3"
+                    sh "make px4_fmu-v3_rtps"
                     sh "make sizes"
                     sh "ccache -s"
                     archiveArtifacts(artifacts: 'build/*/*.px4', fingerprint: true)
@@ -62,7 +62,7 @@ pipeline {
 
 
           // nuttx default targets that are archived and uploaded to s3
-          for (def option in ["aerocore2", "auav-x21", "crazyflie", "mindpx-v2", "nxphlite-v3", "tap-v1"]) {
+          for (def option in ["gumstix_aerocore2", "auav_x21", "bitcraze_crazyflie", "airmind_mindpx-v2", "nxp_hlite-v3", "px4_tap-v1"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -75,7 +75,7 @@ pipeline {
                       sh "make distclean"
                       sh "ccache -z"
                       sh "git fetch --tags"
-                      sh "make nuttx_${node_name}_default"
+                      sh "make ${node_name}"
                       sh "make sizes"
                       sh "ccache -s"
                       archiveArtifacts(artifacts: 'build/*/*.px4', fingerprint: true)
@@ -88,7 +88,7 @@ pipeline {
 
 
           // other nuttx default targets
-          for (def option in ["px4-same70xplained-v1", "px4-stm32f4discovery", "px4cannode-v1", "px4esc-v1", "px4nucleoF767ZI-v1", "s2740vc-v1"]) {
+          for (def option in ["px4_same70xplained-v1", "px4_stm32f4discovery", "px4_cannode-v1", "px4_esc-v1", "px4_nucleoF767ZI-v1", "thiemar_s2740vc-v1"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -100,7 +100,7 @@ pipeline {
                       sh "export"
                       sh "make distclean"
                       sh "ccache -z"
-                      sh "make nuttx_${node_name}_default"
+                      sh "make ${node_name}"
                       sh "make sizes"
                       sh "ccache -s"
                     }
@@ -112,7 +112,7 @@ pipeline {
 
 
           // posix_sitl
-          for (def option in ["sitl_default", "sitl_rtps"]) {
+          for (def option in ["px4_sitl", "px4_sitl_rtps"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -124,7 +124,7 @@ pipeline {
                       sh "export"
                       sh "make distclean"
                       sh "ccache -z"
-                      sh "make posix_${node_name}"
+                      sh "make ${node_name}"
                       sh "ccache -s"
                     }
                   }
@@ -135,7 +135,7 @@ pipeline {
 
 
           // raspberry pi and bebop (armhf)
-          for (def option in ["rpi_cross", "bebop_default"]) {
+          for (def option in ["emlid_navio2_cross", "parrot_bebop"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -147,7 +147,7 @@ pipeline {
                       sh "export"
                       sh "make distclean"
                       sh "ccache -z"
-                      sh "make posix_${node_name}"
+                      sh "make ${node_name}"
                       sh "ccache -s"
                     }
                   }
@@ -158,7 +158,7 @@ pipeline {
 
 
           // other armhf (to be merged with raspi and bebop)
-          for (def option in ["ocpoc_ubuntu"]) {
+          for (def option in ["aerotenna_ocpoc_ubuntu"]) {
             def node_name = "${option}"
 
             builds["${node_name}"] = {
@@ -170,7 +170,7 @@ pipeline {
                       sh "export"
                       sh "make distclean"
                       sh "ccache -z"
-                      sh "make posix_${node_name}"
+                      sh "make ${node_name}"
                       sh "ccache -s"
                     }
                   }
@@ -206,7 +206,7 @@ pipeline {
 
 
           // GCC7 posix
-          for (def option in ["sitl_default"]) {
+          for (def option in ["px4_sitl"]) {
             def node_name = "${option}"
 
             builds["${node_name} (GCC7)"] = {
@@ -218,7 +218,7 @@ pipeline {
                       sh "export"
                       sh "make distclean"
                       sh "ccache -z"
-                      sh "make posix_${node_name}"
+                      sh "make ${node_name}"
                       sh "ccache -s"
                     }
                   }
@@ -334,8 +334,8 @@ pipeline {
           steps {
             sh 'export'
             sh 'make distclean'
-            sh 'make posix_sitl_default test_results_junit'
-            junit 'build/posix_sitl_default/JUnitTestResults.xml'
+            sh 'make px4_sitl test_results_junit'
+            junit 'build/px4_sitl_default/JUnitTestResults.xml'
           }
         }
 
@@ -350,8 +350,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=vtol_new_1.txt vehicle:=standard_vtol'
           }
           post {
@@ -384,8 +384,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=vtol_new_2.txt vehicle:=standard_vtol'
           }
           post {
@@ -418,8 +418,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=vtol_old_1.txt vehicle:=standard_vtol'
           }
           post {
@@ -452,8 +452,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=vtol_old_2.txt vehicle:=standard_vtol'
           }
           post {
@@ -486,8 +486,8 @@ pipeline {
             sh 'export'
             //sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             //sh 'git fetch --tags'
-            //sh 'make posix_sitl_default'
-            //sh 'make posix_sitl_default sitl_gazebo'
+            //sh 'make px4_sitl'
+            //sh 'make px4_sitl sitl_gazebo'
             //sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=vtol_old_3.txt vehicle:=standard_vtol'
           }
           post {
@@ -520,8 +520,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_test_mission.test mission:=multirotor_box.mission vehicle:=iris'
           }
           post {
@@ -554,8 +554,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_tests_offboard_attctl.test'
           }
           post {
@@ -582,8 +582,8 @@ pipeline {
             sh 'export'
             sh 'make distclean; rm -rf .ros; rm -rf .gazebo'
             sh 'git fetch --tags'
-            sh 'make posix_sitl_default'
-            sh 'make posix_sitl_default sitl_gazebo'
+            sh 'make px4_sitl'
+            sh 'make px4_sitl sitl_gazebo'
             sh './test/rostest_px4_run.sh mavros_posix_tests_offboard_posctl.test'
           }
           post {

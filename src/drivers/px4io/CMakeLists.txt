@@ -48,7 +48,7 @@ px4_add_module(
 # include the px4io binary in ROMFS
 message(STATUS "Building and including ${config_io_board}")
 
-set(fw_io_exe "${PX4_SOURCE_DIR}/build/${config_io_board}_default/nuttx_${config_io_board}_default.elf")
+set(fw_io_exe "${PX4_SOURCE_DIR}/build/${config_io_board}_default/${config_io_board}_default.elf")
 set(fw_io_bin "${PX4_BINARY_DIR}/ROMFS/${config_romfs_root}/extras/${config_io_board}.bin")
 
 file(GLOB_RECURSE px4io_driver_files ${PX4_SOURCE_DIR}/src/drivers/boards/${config_io_board}/*)

@@ -136,30 +136,50 @@ define_property(GLOBAL PROPERTY PX4_LIBRARIES
 # configuration
 #
 
-set(CONFIG "posix_sitl_default" CACHE STRING "desired configuration")
+set(CONFIG "px4_fmu-v2_default" CACHE STRING "desired configuration")
+
+# boards/<VENDOR>/<MODEL>/<LABEL>.cmake
+#  <VENDOR>_<MODEL>_<CONFIG>
+# BOARD=<VENDOR><MODEL>
+#  OS set by board config
 
 string(REPLACE "_" ";" config_args ${CONFIG})
-list(GET config_args 0 OS)
-list(GET config_args 1 BOARD)
-list(GET config_args 2 LABEL)
+
+list(LENGTH config_args config_args_length)
+
+list(GET config_args 0 VENDOR)
+list(GET config_args 1 MODEL)
+set(BOARD ${VENDOR}${MODEL})
+
+if (${config_args_length} EQUAL 2)
+	set(LABEL "default")
+else()
+	list(GET config_args 2 LABEL)
+endif()
+
+include(px4_add_board)
+
+list(APPEND CMAKE_MODULE_PATH
+	${PX4_SOURCE_DIR}/boards/${VENDOR}
+	${PX4_SOURCE_DIR}/boards/${VENDOR}/${MODEL}
+	)
+
+include(boards/${VENDOR}/${MODEL}/${LABEL}.cmake)
+
+list(APPEND CMAKE_MODULE_PATH ${PX4_SOURCE_DIR}/platforms/${OS}/cmake)
+
 set(target_name "${OS}_${BOARD}_${LABEL}")
 
-file(GLOB_RECURSE configs RELATIVE cmake/configs "cmake/configs/*.cmake")
-set_property(CACHE CONFIG PROPERTY STRINGS ${configs})
-
-set(THREADS "4" CACHE STRING "number of threads to use for external build processes")
-set(DEBUG_PORT "/dev/ttyACM0" CACHE STRING "debugging port")
+# external modules
 set(EXTERNAL_MODULES_LOCATION "" CACHE STRING "External modules source location")
 
 if (NOT EXTERNAL_MODULES_LOCATION STREQUAL "")
 	get_filename_component(EXTERNAL_MODULES_LOCATION "${EXTERNAL_MODULES_LOCATION}" ABSOLUTE)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${PX4_SOURCE_DIR}/platforms/${OS}/cmake)
+message(STATUS "platforms/${OS}/cmake/px4_impl_os.cmake")
 
 include(platforms/${OS}/cmake/px4_impl_os.cmake)
-set(config_module "configs/${CONFIG}")
-include(${config_module})
 
 include(common/coverage)
 include(common/sanitizers)
