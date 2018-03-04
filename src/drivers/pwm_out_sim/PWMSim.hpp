@@ -53,90 +53,90 @@
 
 class PWMSim : public device::CDev, public ModuleBase<PWMSim>
 {
-	static constexpr uint32_t PWM_SIM_DISARMED_MAGIC = 900;
-	static constexpr uint32_t PWM_SIM_FAILSAFE_MAGIC = 600;
-	static constexpr uint32_t PWM_SIM_PWM_MIN_MAGIC = 1000;
-	static constexpr uint32_t PWM_SIM_PWM_MAX_MAGIC = 2000;
+        static constexpr uint32_t PWM_SIM_DISARMED_MAGIC = 900;
+        static constexpr uint32_t PWM_SIM_FAILSAFE_MAGIC = 600;
+        static constexpr uint32_t PWM_SIM_PWM_MIN_MAGIC = 1000;
+        static constexpr uint32_t PWM_SIM_PWM_MAX_MAGIC = 2000;
 
 public:
 
-	enum Mode {
-		MODE_8PWM,
-		MODE_16PWM,
-		MODE_NONE
-	};
+        enum Mode {
+                MODE_8PWM,
+                MODE_16PWM,
+                MODE_NONE
+        };
 
-	PWMSim();
-	virtual ~PWMSim() = default;
+        PWMSim();
+        virtual ~PWMSim() = default;
 
-	/** @see ModuleBase */
-	static int task_spawn(int argc, char *argv[]);
+        /** @see ModuleBase */
+        static int task_spawn(int argc, char *argv[]);
 
-	/** @see ModuleBase */
-	static PWMSim *instantiate(int argc, char *argv[]);
+        /** @see ModuleBase */
+        static PWMSim *instantiate(int argc, char *argv[]);
 
-	/** @see ModuleBase */
-	static int custom_command(int argc, char *argv[]);
+        /** @see ModuleBase */
+        static int custom_command(int argc, char *argv[]);
 
-	/** @see ModuleBase */
-	static int print_usage(const char *reason = nullptr);
+        /** @see ModuleBase */
+        static int print_usage(const char *reason = nullptr);
 
-	/** @see ModuleBase::run() */
-	void run() override;
+        /** @see ModuleBase::run() */
+        void run() override;
 
-	/** @see ModuleBase::print_status() */
-	int print_status() override;
+        /** @see ModuleBase::print_status() */
+        int print_status() override;
 
 
-	int		ioctl(device::file_t *filp, int cmd, unsigned long arg) override;
+        int		ioctl(device::file_t *filp, int cmd, unsigned long arg) override;
 
-	int		set_pwm_rate(unsigned rate);
+        int		set_pwm_rate(unsigned rate);
 
-	int		set_mode(Mode mode);
-	Mode	get_mode() { return _mode; }
+        int		set_mode(Mode mode);
+        Mode	get_mode() { return _mode; }
 
 private:
-	static constexpr unsigned MAX_ACTUATORS = 16;
+        static constexpr unsigned MAX_ACTUATORS = 16;
 
-	Mode		_mode{MODE_NONE};
+        Mode		_mode{MODE_NONE};
 
-	int 		_update_rate{400};
-	int 		_current_update_rate{0};
+        int 		_update_rate{400};
+        int 		_current_update_rate{0};
 
-	int			_control_subs[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
+        int			_control_subs[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
 
-	px4_pollfd_struct_t	_poll_fds[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
-	unsigned	_poll_fds_num{0};
+        px4_pollfd_struct_t	_poll_fds[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
+        unsigned	_poll_fds_num{0};
 
-	int		_armed_sub{-1};
+        int		_armed_sub{-1};
 
-	actuator_outputs_s _actuator_outputs = {};
-	orb_advert_t	_outputs_pub{nullptr};
+        actuator_outputs_s _actuator_outputs = {};
+        orb_advert_t	_outputs_pub{nullptr};
 
-	unsigned	_num_outputs{0};
+        unsigned	_num_outputs{0};
 
-	unsigned 	_pwm_min[MAX_ACTUATORS] {};
-	unsigned 	_pwm_max[MAX_ACTUATORS] {};
+        unsigned 	_pwm_min[MAX_ACTUATORS] {};
+        unsigned 	_pwm_max[MAX_ACTUATORS] {};
 
-	uint32_t	_groups_required{0};
-	uint32_t	_groups_subscribed{0};
+        uint32_t	_groups_required{0};
+        uint32_t	_groups_subscribed{0};
 
-	bool	_armed{false};
-	bool	_lockdown{false};
-	bool	_failsafe{false};
+        bool	_armed{false};
+        bool	_lockdown{false};
+        bool	_failsafe{false};
 
-	MixerGroup	*_mixers{nullptr};
+        MixerGroup	*_mixers{nullptr};
 
-	actuator_controls_s _controls[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
-	orb_id_t	_control_topics[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
+        actuator_controls_s _controls[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
+        orb_id_t	_control_topics[actuator_controls_s::NUM_ACTUATOR_CONTROL_GROUPS] {};
 
-	bool 	_airmode{false}; 	///< multicopter air-mode
+        bool 	_airmode{false}; 	///< multicopter air-mode
 
-	static int	control_callback(uintptr_t handle, uint8_t control_group, uint8_t control_index, float &input);
+        static int	control_callback(uintptr_t handle, uint8_t control_group, uint8_t control_index, float &input);
 
-	void 	subscribe();
+        void 	subscribe();
 
-	void 	update_params();
+        void 	update_params();
 };
 
 #endif /* DRIVERS_PWM_OUT_SIM_PWMSIM_HPP_ */
