@@ -1356,16 +1356,6 @@ FixedwingPositionControl::control_landing(const Vector2f &curr_pos, const Vector
 		}
 	}
 
-	/* Calculate distance (to landing waypoint) and altitude of last ordinary waypoint L */
-	float L_altitude_rel = 0.0f;
-
-	if (pos_sp_prev.valid) {
-		L_altitude_rel = pos_sp_prev.alt - terrain_alt;
-	}
-
-	float landing_slope_alt_rel_desired = _landingslope.getLandingSlopeRelativeAltitudeSave(wp_distance,
-					      bearing_lastwp_currwp, bearing_airplane_currwp);
-
 	/* Check if we should start flaring with a vertical and a
 	 * horizontal limit (with some tolerance)
 	 * The horizontal limit is only applied when we are in front of the wp
@@ -1449,11 +1439,15 @@ FixedwingPositionControl::control_landing(const Vector2f &curr_pos, const Vector
 		 * if current position is below the slope continue at previous wp altitude
 		 * until the intersection with slope
 		 * */
-		float altitude_desired_rel{0.0f};
 
+		float altitude_desired = terrain_alt;
+
+		const float landing_slope_alt_rel_desired = _landingslope.getLandingSlopeRelativeAltitudeSave(wp_distance,
+					      bearing_lastwp_currwp, bearing_airplane_currwp);
+		
 		if (_global_pos.alt > terrain_alt + landing_slope_alt_rel_desired || _land_onslope) {
 			/* stay on slope */
-			altitude_desired_rel = landing_slope_alt_rel_desired;
+			altitude_desired = terrain_alt + landing_slope_alt_rel_desired;
 
 			if (!_land_onslope) {
 				mavlink_log_info(&_mavlink_log_pub, "Landing, on slope");
@@ -1463,16 +1457,16 @@ FixedwingPositionControl::control_landing(const Vector2f &curr_pos, const Vector
 		} else {
 			/* continue horizontally */
 			if (pos_sp_prev.valid) {
-				altitude_desired_rel = L_altitude_rel;
+				altitude_desired = pos_sp_prev.alt;
 
 			} else {
-				altitude_desired_rel = _global_pos.alt - terrain_alt;
+				altitude_desired = _global_pos.alt;
 			}
 		}
 
 		const float airspeed_approach = _parameters.land_airspeed_scale * _parameters.airspeed_min;
 
-		tecs_update_pitch_throttle(terrain_alt + altitude_desired_rel,
+		tecs_update_pitch_throttle(altitude_desired,
 					   calculate_target_airspeed(airspeed_approach),
 					   radians(_parameters.pitch_limit_min),
 					   radians(_parameters.pitch_limit_max),
