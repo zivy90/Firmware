@@ -1253,8 +1253,11 @@ FixedwingPositionControl::control_landing(const Vector2f &curr_pos, const Vector
 		_fw_pos_ctrl_status.abort_landing = false;
 	}
 
-	float bearing_lastwp_currwp = get_bearing_to_next_waypoint(prev_wp(0), prev_wp(1), curr_wp(0), curr_wp(1));
-	float bearing_airplane_currwp = get_bearing_to_next_waypoint(curr_pos(0), curr_pos(1), curr_wp(0), curr_wp(1));
+	float bearing_lastwp_currwp = _yaw;
+	if (pos_sp_prev.valid) {
+		bearing_lastwp_currwp = get_bearing_to_next_waypoint(prev_wp(0), prev_wp(1), curr_wp(0), curr_wp(1));
+	}
+	const float bearing_airplane_currwp = get_bearing_to_next_waypoint(curr_pos(0), curr_pos(1), curr_wp(0), curr_wp(1));
 
 	/* Horizontal landing control */
 	/* switch to heading hold for the last meters, continue heading hold after */
@@ -1443,7 +1446,7 @@ FixedwingPositionControl::control_landing(const Vector2f &curr_pos, const Vector
 		float altitude_desired = terrain_alt;
 
 		const float landing_slope_alt_rel_desired = _landingslope.getLandingSlopeRelativeAltitudeSave(wp_distance,
-					      bearing_lastwp_currwp, bearing_airplane_currwp);
+				bearing_lastwp_currwp, bearing_airplane_currwp);
 		
 		if (_global_pos.alt > terrain_alt + landing_slope_alt_rel_desired || _land_onslope) {
 			/* stay on slope */
