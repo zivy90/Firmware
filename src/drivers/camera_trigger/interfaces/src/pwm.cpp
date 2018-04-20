@@ -7,8 +7,8 @@
 #include "pwm.h"
 
 // TODO : make these parameters later
-#define PWM_CAMERA_SHOOT 1900
-#define PWM_CAMERA_NEUTRAL 1500
+#define PWM_CAMERA_SHOOT 2000
+#define PWM_CAMERA_NEUTRAL 1000
 
 CameraInterfacePWM::CameraInterfacePWM():
 	CameraInterface()
