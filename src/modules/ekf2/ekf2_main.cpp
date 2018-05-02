@@ -441,9 +441,9 @@ Ekf2::Ekf2():
 	// non EKF2 parameters
 	_airspeed_disabled(this, "FW_ARSP_MODE", false)
 {
-	// advertise the wind topic early to make sure we get the first instance (before the standalone wind estimator)
-	wind_estimate_s wind_estimate = {};
-	_wind_pub = orb_advertise(ORB_ID(wind_estimate), &wind_estimate);
+	// // advertise the wind topic early to make sure we get the first instance (before the standalone wind estimator)
+	// wind_estimate_s wind_estimate = {};
+	// _wind_pub = orb_advertise(ORB_ID(wind_estimate), &wind_estimate);
 }
 
 int Ekf2::print_status()
@@ -1197,7 +1197,7 @@ void Ekf2::run()
 					_total_cal_time_us = 0;
 				}
 
-				{
+				if (false) {
 					// Velocity of body origin in local NED frame (m/s)
 					float velocity[3];
 					_ekf.get_velocity(velocity);
