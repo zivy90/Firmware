@@ -34,8 +34,8 @@
 #include <drivers/drv_hrt.h>
 #include <ecl/airdata/WindEstimator.hpp>
 #include <matrix/matrix/math.hpp>
+#include <controllib/block/BlockParam.hpp>
 #include <px4_module.h>
-#include <px4_module_params.h>
 #include <px4_workqueue.h>
 #include <systemlib/param/param.h>
 #include <systemlib/perf_counter.h>
@@ -53,7 +53,7 @@ using matrix::Quatf;
 using matrix::Vector2f;
 using matrix::Vector3f;
 
-class WindEstimatorModule : public ModuleBase<WindEstimatorModule>, public ModuleParams
+class WindEstimatorModule : public control::SuperBlock, public ModuleBase<WindEstimatorModule>
 {
 public:
 
@@ -89,12 +89,10 @@ private:
 	perf_counter_t _perf_elapsed{};
 	perf_counter_t _perf_interval{};
 
-	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::WEST_W_P_NOISE>) wind_p_noise,
-		(ParamFloat<px4::params::WEST_SC_P_NOISE>) tas_scale_p_noise,
-		(ParamFloat<px4::params::WEST_TAS_NOISE>) tas_noise,
-		(ParamFloat<px4::params::WEST_BETA_NOISE>) beta_noise
-	)
+	control::BlockParamFloat wind_p_noise;
+	control::BlockParamFloat tas_scale_p_noise;
+	control::BlockParamFloat tas_noise;
+	control::BlockParamFloat beta_noise;
 
 	static void	cycle_trampoline(void *arg);
 	int 		start();
@@ -107,7 +105,11 @@ private:
 work_s	WindEstimatorModule::_work = {};
 
 WindEstimatorModule::WindEstimatorModule():
-	ModuleParams(nullptr)
+	SuperBlock(nullptr, "WEST"),
+	wind_p_noise(this, "W_P_NOISE"),
+	tas_scale_p_noise(this, "SC_P_NOISE"),
+	tas_noise(this, "TAS_NOISE"),
+	beta_noise(this, "BETA_NOISE")
 {
 	_vehicle_attitude_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	_vehicle_local_position_sub = orb_subscribe(ORB_ID(vehicle_local_position));
@@ -184,7 +186,7 @@ WindEstimatorModule::cycle()
 	orb_check(_param_sub, &param_updated);
 
 	if (param_updated) {
-		update_params();
+		updateParams();
 	}
 
 	bool lpos_valid = false;
