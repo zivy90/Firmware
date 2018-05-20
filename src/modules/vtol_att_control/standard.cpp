@@ -70,6 +70,7 @@ Standard::Standard(VtolAttitudeControl *attc) :
 	_params_handles_standard.airspeed_trans = param_find("VT_ARSP_TRANS");
 	_params_handles_standard.front_trans_timeout = param_find("VT_TRANS_TIMEOUT");
 	_params_handles_standard.front_trans_time_min = param_find("VT_TRANS_MIN_TM");
+	_params_handles_standard.front_trans_ramp = param_find("VT_F_TRANS_RAMP");
 	_params_handles_standard.down_pitch_max = param_find("VT_DWN_PITCH_MAX");
 	_params_handles_standard.forward_thrust_scale = param_find("VT_FWD_THRUST_SC");
 	_params_handles_standard.airspeed_disabled = param_find("FW_ARSP_MODE");
@@ -122,6 +123,10 @@ Standard::parameters_update()
 
 	/* minimum time for transition to fw mode */
 	param_get(_params_handles_standard.front_trans_time_min, &_params_standard.front_trans_time_min);
+
+	/* FW ramp up after transition to fw mode */
+	param_get(_params_handles_standard.front_trans_ramp, &v);
+	_params_standard.front_trans_ramp = math::constrain(v, 0.0f, 20.0f);
 
 	/* maximum down pitch allowed */
 	param_get(_params_handles_standard.down_pitch_max, &v);
@@ -544,9 +549,25 @@ void Standard::fill_actuator_outputs()
 	// set the fixed wing throttle control
 	if (_vtol_schedule.flight_mode == FW_MODE) {
 
-		// take the throttle value commanded by the fw controller
-		_actuators_out_1->control[actuator_controls_s::INDEX_THROTTLE] =
-			_actuators_fw_in->control[actuator_controls_s::INDEX_THROTTLE];
+		float time_since_trans_end = (float)(hrt_absolute_time() - _trans_finished_ts) * 1e-6f;
+
+		if (time_since_trans_end < _params_standard.front_trans_ramp) {
+
+			// ramp down pusher
+			float thr_diff = _pusher_throttle - _actuators_fw_in->control[actuator_controls_s::INDEX_THROTTLE];
+			_actuators_out_1->control[actuator_controls_s::INDEX_THROTTLE] =
+				_pusher_throttle - (thr_diff * (time_since_trans_end / _params_standard.front_trans_ramp));
+
+			// ramp up roll
+			_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] =
+				_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] * (time_since_trans_end / _params_standard.front_trans_ramp);
+
+
+		} else {
+			// take the throttle value commanded by the fw controller
+			_actuators_out_1->control[actuator_controls_s::INDEX_THROTTLE] =
+				_actuators_fw_in->control[actuator_controls_s::INDEX_THROTTLE];
+		}
 
 	} else {
 		// otherwise we may be ramping up the throttle during the transition to fw mode

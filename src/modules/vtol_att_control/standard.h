@@ -75,6 +75,7 @@ private:
 		float airspeed_trans;
 		float front_trans_timeout;
 		float front_trans_time_min;
+		float front_trans_ramp;
 		float down_pitch_max;
 		float forward_thrust_scale;
 		int32_t airspeed_disabled;
@@ -94,6 +95,7 @@ private:
 		param_t airspeed_trans;
 		param_t front_trans_timeout;
 		param_t front_trans_time_min;
+		param_t front_trans_ramp;
 		param_t down_pitch_max;
 		param_t forward_thrust_scale;
 		param_t airspeed_disabled;
