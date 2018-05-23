@@ -117,15 +117,15 @@ set(config_module_list
 	#modules/local_position_estimator
 	#modules/position_estimator_inav
 	#modules/landing_target_estimator
-	#modules/wind_estimator
+        modules/wind_estimator
 
 	#
 	# Vehicle Control
 	#
 	modules/fw_att_control
 	modules/fw_pos_control_l1
-	modules/gnd_att_control
-	modules/gnd_pos_control
+        #modules/gnd_att_control
+        #modules/gnd_pos_control
 	modules/mc_att_control
 	modules/mc_pos_control
 	modules/vtol_att_control
