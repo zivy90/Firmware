@@ -244,7 +244,7 @@ public:
 
 	float		get_loiter_min_alt() const { return _param_loiter_min_alt.get(); }
 
-	bool		force_vtol() const { return _vstatus.is_vtol && !_vstatus.is_rotary_wing && _param_force_vtol.get(); }
+	bool		force_vtol() const { return _vstatus.is_vtol && (!_vstatus.is_rotary_wing || _vstatus.in_transition_to_fw) && _param_force_vtol.get(); }
 
 private:
 
