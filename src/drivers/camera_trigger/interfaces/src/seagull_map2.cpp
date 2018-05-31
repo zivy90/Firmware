@@ -19,7 +19,7 @@
 
 CameraInterfaceSeagull::CameraInterfaceSeagull():
 	CameraInterface(),
-	_camera_is_on(false)
+    _camera_is_on(true)
 {
 	get_pins();
 	setup();
@@ -41,8 +41,8 @@ void CameraInterfaceSeagull::setup()
 			up_pwm_trigger_init(pin_bitmask);
 
 			// Set both interface pins to disarmed
-			up_pwm_trigger_set(_pins[i + 1], PWM_CAMERA_DISARMED);
-			up_pwm_trigger_set(_pins[i], PWM_CAMERA_DISARMED);
+            up_pwm_trigger_set(_pins[i + 1], PWM_CAMERA_NEUTRAL);
+            up_pwm_trigger_set(_pins[i], PWM_CAMERA_NEUTRAL);
 
 			// We only support 2 consecutive pins while using the Seagull MAP2
 			return;
