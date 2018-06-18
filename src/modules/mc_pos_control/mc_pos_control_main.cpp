@@ -57,8 +57,10 @@
 #include <drivers/drv_hrt.h>
 #include <systemlib/hysteresis/hysteresis.h>
 
+#include <uORB/Subscription.hpp>
 #include <uORB/topics/home_position.h>
 #include <uORB/topics/manual_control_setpoint.h>
+#include <uORB/topics/manual_control_switches.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/vehicle_attitude.h>
@@ -166,6 +168,8 @@ private:
 	struct position_setpoint_triplet_s		_pos_sp_triplet;	/**< vehicle global position setpoint triplet */
 	struct vehicle_local_position_setpoint_s	_local_pos_sp;		/**< vehicle local position setpoint */
 	struct home_position_s				_home_pos; 				/**< home position */
+
+	uORB::Subscription<manual_control_switches_s>			_manual_switches_sub{ORB_ID(manual_control_switches)};
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::MPC_FLT_TSK>) _test_flight_tasks, /**< temporary flag for the transition to flight tasks */
@@ -696,6 +700,8 @@ MulticopterPositionControl::poll_subscriptions()
 	if (updated) {
 		orb_copy(ORB_ID(manual_control_setpoint), _manual_sub, &_manual);
 	}
+
+	_manual_switches_sub.update();
 
 	orb_check(_local_pos_sub, &updated);
 
@@ -2887,11 +2893,13 @@ MulticopterPositionControl::generate_attitude_setpoint()
 	// the user switched from gear down to gear up.
 	// If the user had the switch in the gear up position and took off ignore it
 	// until he toggles the switch to avoid retracting the gear immediately on takeoff.
-	if (_manual.gear_switch == manual_control_setpoint_s::SWITCH_POS_ON && _gear_state_initialized &&
+	if (_manual_switches_sub.get().gear_switch == manual_control_switches_s::SWITCH_POS_ON && _gear_state_initialized &&
 	    !_vehicle_land_detected.landed) {
+
 		_att_sp.landing_gear = vehicle_attitude_setpoint_s::LANDING_GEAR_UP;
 
-	} else if (_manual.gear_switch == manual_control_setpoint_s::SWITCH_POS_OFF) {
+	} else if (_manual_switches_sub.get().gear_switch == manual_control_switches_s::SWITCH_POS_OFF) {
+
 		_att_sp.landing_gear = vehicle_attitude_setpoint_s::LANDING_GEAR_DOWN;
 		// Switching the gear off does put it into a safe defined state
 		_gear_state_initialized = true;

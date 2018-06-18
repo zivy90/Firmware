@@ -54,6 +54,7 @@
 // subscriptions
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/geofence_result.h>
+#include <uORB/topics/manual_control_switches.h>
 #include <uORB/topics/mission_result.h>
 #include <uORB/topics/safety.h>
 #include <uORB/topics/vehicle_command.h>
@@ -170,6 +171,7 @@ private:
 	} _telemetry[ORB_MULTI_MAX_INSTANCES];
 
 	// Subscriptions
+	Subscription<manual_control_switches_s>		_manual_control_switches_sub{ORB_ID(manual_control_switches)};
 	Subscription<mission_result_s>			_mission_result_sub;
 	Subscription<vehicle_global_position_s>		_global_position_sub;
 	Subscription<vehicle_local_position_s>		_local_position_sub;

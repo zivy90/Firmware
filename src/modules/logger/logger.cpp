@@ -619,6 +619,7 @@ void Logger::add_default_topics()
 	add_topic("iridiumsbd_status");
 	add_topic("landing_target_pose");
 	add_topic("manual_control_setpoint", 200);
+	add_topic("manual_control_switches");
 	add_topic("mission");
 	add_topic("mission_result");
 	add_topic("optical_flow", 50);
