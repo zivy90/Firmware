@@ -187,6 +187,7 @@ public:
 	unsigned int published_message_count() const { return _generation; }
 	const struct orb_metadata *get_meta() const { return _meta; }
 
+	int get_priority() { return _priority; }
 	void set_priority(uint8_t priority) { _priority = priority; }
 
 protected:
@@ -207,9 +208,6 @@ private:
 		unsigned  generation; /**< last generation the subscriber has seen */
 		int   flags; /**< lowest 8 bits: priority of publisher, 9. bit: update_reported bit */
 		UpdateIntervalData *update_interval; /**< if null, no update interval */
-
-		int priority() const { return flags & 0xff; }
-		void set_priority(uint8_t prio) { flags = (flags & ~0xff) | prio; }
 
 		bool update_reported() const { return flags & (1 << 8); }
 		void set_update_reported(bool update_reported_flag) { flags = (flags & ~(1 << 8)) | (((int)update_reported_flag) << 8); }
