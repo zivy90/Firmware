@@ -50,6 +50,7 @@ Standard::Standard(VtolAttitudeControl *attc) :
 	VtolType(attc),
 	_flag_enable_mc_motors(true),
 	_pusher_throttle(0.0f),
+	_last_roll_output(0.0f),
 	_reverse_output(0.0f),
 	_airspeed_trans_blend_margin(0.0f)
 {
@@ -528,6 +529,7 @@ void Standard::fill_actuator_outputs()
 		//roll
 		_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] =
 			-_actuators_fw_in->control[actuator_controls_s::INDEX_ROLL];
+
 		//pitch
 		_actuators_out_1->control[actuator_controls_s::INDEX_PITCH] =
 			_actuators_fw_in->control[actuator_controls_s::INDEX_PITCH] + _params->fw_pitch_trim;
@@ -539,15 +541,37 @@ void Standard::fill_actuator_outputs()
 
 	} else {
 
-		// zero outputs when inactive
-		_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] = 0.0f;
-		_actuators_out_1->control[actuator_controls_s::INDEX_PITCH] = _params->fw_pitch_trim;
-		_actuators_out_1->control[actuator_controls_s::INDEX_YAW] = 0.0f;
-		_actuators_out_1->control[actuator_controls_s::INDEX_AIRBRAKES] = 0.0f;
+		if (_params->elevons_mc_lock) {
+			// zero outputs when inactive
+			_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] = 0.0f;
+			_actuators_out_1->control[actuator_controls_s::INDEX_PITCH] = 0.0f;
+			_actuators_out_1->control[actuator_controls_s::INDEX_YAW] = 0.0f;
+			_actuators_out_1->control[actuator_controls_s::INDEX_AIRBRAKES] = 0.0f;
+
+		} else {
+			// roll
+			_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] =
+				-_actuators_fw_in->control[actuator_controls_s::INDEX_ROLL];
+
+			// pitch
+			_actuators_out_1->control[actuator_controls_s::INDEX_PITCH] =
+				_actuators_fw_in->control[actuator_controls_s::INDEX_PITCH];
+
+			_actuators_out_1->control[actuator_controls_s::INDEX_YAW] = 0.0f;
+			_actuators_out_1->control[actuator_controls_s::INDEX_AIRBRAKES] = 0.0f;
+		}
+
+	}
+
+	if(_vtol_schedule.flight_mode == TRANSITION_TO_FW){
+		_last_roll_output = _actuators_out_1->control[actuator_controls_s::INDEX_ROLL];
 	}
 
 	// set the fixed wing throttle control
 	if (_vtol_schedule.flight_mode == FW_MODE) {
+
+
+
 
 		float time_since_trans_end = (float)(hrt_absolute_time() - _trans_finished_ts) * 1e-6f;
 
@@ -560,7 +584,8 @@ void Standard::fill_actuator_outputs()
 
 			// ramp up roll
 			_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] =
-				_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] * (time_since_trans_end / _params_standard.front_trans_ramp);
+				_last_roll_output + ((_actuators_out_1->control[actuator_controls_s::INDEX_ROLL] - _last_roll_output) *
+						     (time_since_trans_end / _params_standard.front_trans_ramp));
 
 
 		} else {

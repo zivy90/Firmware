@@ -120,6 +120,7 @@ private:
 
 	bool _flag_enable_mc_motors;
 	float _pusher_throttle;
+	float _last_roll_output;
 	float _reverse_output;
 	float _airspeed_trans_blend_margin;
 
