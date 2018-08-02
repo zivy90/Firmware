@@ -39,6 +39,7 @@ set(config_module_list
 	drivers/rgbled_pwm
 	drivers/tap_esc
 	drivers/vmount
+	drivers/safety_button
 	modules/sensors
 
 	#
