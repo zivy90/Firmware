@@ -50,17 +50,21 @@
 #include <nuttx/fs/fs.h>
 #else
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <drivers/device/device.h>
 #endif
+
+#if defined(CONFIG_NET) || !defined(__PX4_NUTTX)
+#include <netinet/in.h>
+#endif
+
 #include <parameters/param.h>
 #include <perf/perf_counter.h>
 #include <pthread.h>
 #include <systemlib/mavlink_log.h>
 #include <drivers/device/ringbuffer.h>
 
-#ifdef __PX4_POSIX
+#if defined(CONFIG_NET) || defined(__PX4_POSIX)
 #include <net/if.h>
 #endif
 
@@ -184,7 +188,8 @@ public:
 
 	enum BROADCAST_MODE {
 		BROADCAST_MODE_OFF = 0,
-		BROADCAST_MODE_ON
+		BROADCAST_MODE_ON,
+		BROADCAST_MODE_MULTICAST
 	};
 
 	enum FLOW_CONTROL_MODE {
@@ -423,9 +428,9 @@ public:
 	 */
 	telemetry_status_s	&get_telemetry_status() { return _tstatus; }
 
-	void				set_telemetry_status_type(uint8_t type) { _tstatus.type = type; }
+	void			set_telemetry_status_type(uint8_t type) { _tstatus.type = type; }
 
-	void update_radio_status(const radio_status_s &radio_status);
+	void			update_radio_status(const radio_status_s &radio_status);
 
 	ringbuffer::RingBuffer	*get_logbuffer() { return &_logbuffer; }
 
@@ -442,7 +447,8 @@ public:
 	const in_addr query_netmask_addr(const int socket_fd, const ifreq &ifreq);
 
 	const in_addr compute_broadcast_addr(const in_addr &host_addr, const in_addr &netmask_addr);
-
+#endif
+#if defined(CONFIG_NET) || defined(__PX4_POSIX)
 	struct sockaddr_in 	&get_client_source_address() { return _src_addr; }
 
 	void			set_client_source_initialized() { _src_addr_initialized = true; }
@@ -585,7 +591,7 @@ private:
 	unsigned		_bytes_rx;
 	uint64_t		_bytes_timestamp;
 
-#ifdef __PX4_POSIX
+#if defined(CONFIG_NET) || defined(__PX4_POSIX)
 	struct sockaddr_in _myaddr;
 	struct sockaddr_in _src_addr;
 	struct sockaddr_in _bcast_addr;
@@ -634,7 +640,7 @@ private:
 
 	perf_counter_t		_loop_perf;			/**< loop performance counter */
 
-	void mavlink_update_parameters();
+	void			mavlink_update_parameters();
 
 	int			mavlink_open_uart(int baudrate, const char *uart_name, bool force_flow_control);
 
