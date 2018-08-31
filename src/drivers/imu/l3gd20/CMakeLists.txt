@@ -33,7 +33,7 @@
 px4_add_module(
 	MODULE drivers__l3gd20
 	MAIN l3gd20
-	STACK_MAIN 1200
+	STACK_MAIN 2000
 	COMPILE_FLAGS
 	SRCS
 		l3gd20.cpp
