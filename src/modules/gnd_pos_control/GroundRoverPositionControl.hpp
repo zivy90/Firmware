@@ -208,5 +208,9 @@ private:
 	 * Main sensor collection task.
 	 */
 	void		task_main();
+        /**
+         * Helper function to map range [0,1] to [mid,1.0]
+         */
+        float map_above(float source, float mid);
 
 };
