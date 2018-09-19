@@ -57,6 +57,10 @@ using matrix::Vector3f;
  */
 extern "C" __EXPORT int gnd_pos_control_main(int argc, char *argv[]);
 
+namespace gnd_throttle
+{
+const float HOLD = 0.5;
+}
 
 namespace gnd_control
 {
@@ -186,6 +190,11 @@ GroundRoverPositionControl::position_setpoint_triplet_poll()
 	}
 }
 
+float GroundRoverPositionControl::map_above(float source, float mid)
+{
+	return (1.0f - mid) * source + mid;
+}
+
 bool
 GroundRoverPositionControl::control_position(const matrix::Vector2f &current_position,
 		const matrix::Vector3f &ground_speed, const position_setpoint_triplet_s &pos_sp_triplet)
@@ -221,7 +230,9 @@ GroundRoverPositionControl::control_position(const matrix::Vector2f &current_pos
 
 		matrix::Vector2f ground_speed_2d = {ground_speed(0), ground_speed(1)};
 
-		float mission_throttle = _parameters.throttle_cruise;
+//		float mission_throttle = _parameters.throttle_cruise;
+		/* map mission_throttle to the upper half of the throttle range for forward only */
+		float mission_throttle = map_above(_parameters.throttle_cruise, gnd_throttle::HOLD);
 
 		/* Just control the throttle */
 		if (_parameters.speed_control_mode == 1) {
