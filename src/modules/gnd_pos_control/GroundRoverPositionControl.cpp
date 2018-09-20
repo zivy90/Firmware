@@ -509,22 +509,24 @@ GroundRoverPositionControl::task_main_trampoline(int argc, char *argv[])
 int
 GroundRoverPositionControl::start()
 {
-        ASSERT(_control_task == -1);
+	ASSERT(_control_task == -1);
+	warn("Starting by marco");
 
-        /* start the task */
-        _control_task = px4_task_spawn_cmd("gnd_pos_ctrl",
-                                           SCHED_DEFAULT,
-                                           SCHED_PRIORITY_POSITION_CONTROL,
-                                           1700,
-                                           (px4_main_t)&GroundRoverPositionControl::task_main_trampoline,
-                                           nullptr);
+	/* start the task */
+	_control_task = px4_task_spawn_cmd("gnd_pos_ctrl",
+					   SCHED_DEFAULT,
+					   SCHED_PRIORITY_POSITION_CONTROL,
+					   1700,
+					   (px4_main_t)&GroundRoverPositionControl::task_main_trampoline,
+					   nullptr);
+	warn("done");
 
-        if (_control_task < 0) {
-                warn("task start failed");
-                return -errno;
-        }
+	if (_control_task < 0) {
+		warn("task start failed");
+		return -errno;
+	}
 
-        return OK;
+	return OK;
 }
 
 int gnd_pos_control_main(int argc, char *argv[])

@@ -54,7 +54,6 @@ namespace att_gnd_control
 {
 GroundRoverAttitudeControl	*g_control = nullptr;
 }
-
 namespace gnd_throttle
 {
 const double HOLD = 0.5;
@@ -145,6 +144,7 @@ GroundRoverAttitudeControl::vehicle_control_mode_poll()
 	}
 }
 
+
 void
 GroundRoverAttitudeControl::vehicle_status_poll()
 {
@@ -202,10 +202,11 @@ GroundRoverAttitudeControl::task_main()
 	_att_sp_sub = orb_subscribe(ORB_ID(vehicle_attitude_setpoint));
 	_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	_vcontrol_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
+	_vstatus_sub = orb_subscribe(ORB_ID(vehicle_status));
 	_params_sub = orb_subscribe(ORB_ID(parameter_update));
 	_manual_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
 	_battery_status_sub = orb_subscribe(ORB_ID(battery_status));
-	_vstatus_sub = orb_subscribe(ORB_ID(vehicle_status));
+
 	parameters_update();
 
 	/* get an initial update for all sensor and status data */
@@ -329,9 +330,9 @@ GroundRoverAttitudeControl::task_main()
 				}
 
 				/* When reverse is possible, at HOLD mode, throttle hold pwm should be at the mid position */
-				if (_vstatus.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER) {
-						_actuators.control[actuator_controls_s::INDEX_THROTTLE] = gnd_throttle::HOLD;
-					}
+								if (_vstatus.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER) {
+									_actuators.control[actuator_controls_s::INDEX_THROTTLE] = gnd_throttle::HOLD;
+								}
 
 			} else {
 				/* manual/direct control */
