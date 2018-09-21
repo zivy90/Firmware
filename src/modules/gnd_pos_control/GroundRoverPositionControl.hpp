@@ -178,6 +178,10 @@ private:
 
 	} _parameter_handles{};		/**< handles for interesting parameters */
 
+	/**
+	 * Helper function to map range [0,1] to [mid,1.0]
+	 */
+	float map_above(float source, float mid);
 
 	/**
 	 * Update our local parameter cache.
@@ -197,20 +201,15 @@ private:
 	 * Control position.
 	 */
 	bool		control_position(const matrix::Vector2f &global_pos, const matrix::Vector3f &ground_speed,
-					 const position_setpoint_triplet_s &_pos_sp_triplet);
-
+						 const position_setpoint_triplet_s &_pos_sp_triplet);
 	/**
 	 * Shim for calling task_main from task_create.
 	 */
-	static int	task_main_trampoline(int argc, char *argv[]);
+	static void	task_main_trampoline(int argc, char *argv[]);
 
 	/**
 	 * Main sensor collection task.
 	 */
 	void		task_main();
-        /**
-         * Helper function to map range [0,1] to [mid,1.0]
-         */
-        float map_above(float source, float mid);
 
 };

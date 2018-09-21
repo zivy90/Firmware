@@ -54,11 +54,11 @@ namespace att_gnd_control
 {
 GroundRoverAttitudeControl	*g_control = nullptr;
 }
+
 namespace gnd_throttle
 {
 const double HOLD = 0.5;
 }
-
 
 GroundRoverAttitudeControl::GroundRoverAttitudeControl() :
 	/* performance counters */
@@ -150,11 +150,11 @@ GroundRoverAttitudeControl::vehicle_status_poll()
 {
 	bool updated = false;
 	orb_check(_vstatus_sub, &updated);
- 	if (updated) {
+
+	if (updated) {
 		orb_copy(ORB_ID(vehicle_status), _vstatus_sub, &_vstatus);
 	}
 }
-
 
 void
 GroundRoverAttitudeControl::manual_control_setpoint_poll()
@@ -190,11 +190,10 @@ GroundRoverAttitudeControl::battery_status_poll()
 	}
 }
 
-int
+void
 GroundRoverAttitudeControl::task_main_trampoline(int argc, char *argv[])
 {
 	att_gnd_control::g_control->task_main();
-	return 0;
 }
 
 void
@@ -203,10 +202,11 @@ GroundRoverAttitudeControl::task_main()
 	_att_sp_sub = orb_subscribe(ORB_ID(vehicle_attitude_setpoint));
 	_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
 	_vcontrol_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
+	_vstatus_sub = orb_subscribe(ORB_ID(vehicle_status));
 	_params_sub = orb_subscribe(ORB_ID(parameter_update));
 	_manual_sub = orb_subscribe(ORB_ID(manual_control_setpoint));
 	_battery_status_sub = orb_subscribe(ORB_ID(battery_status));
-	_vstatus_sub = orb_subscribe(ORB_ID(vehicle_status));
+
 	parameters_update();
 
 	/* get an initial update for all sensor and status data */
@@ -328,10 +328,12 @@ GroundRoverAttitudeControl::task_main()
 						_actuators.control[actuator_controls_s::INDEX_THROTTLE] *= _battery_status.scale;
 					}
 				}
+
 				/* When reverse is possible, at HOLD mode, throttle hold pwm should be at the mid position */
-								if (_vstatus.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER) {
-									_actuators.control[actuator_controls_s::INDEX_THROTTLE] = gnd_throttle::HOLD;
-								}
+				if (_vstatus.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER) {
+					_actuators.control[actuator_controls_s::INDEX_THROTTLE] = gnd_throttle::HOLD;
+				}
+
 			} else {
 				/* manual/direct control */
 				_actuators.control[actuator_controls_s::INDEX_ROLL] = _manual.y;

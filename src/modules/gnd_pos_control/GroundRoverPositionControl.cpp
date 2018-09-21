@@ -61,6 +61,7 @@ namespace gnd_throttle
 {
 const float HOLD = 0.5;
 }
+
 namespace gnd_control
 {
 GroundRoverPositionControl	*g_control = nullptr;
@@ -207,12 +208,10 @@ void GroundRoverPositionControl::gnd_pos_ctrl_status_publish()
 	}
 }
 
-
 float GroundRoverPositionControl::map_above(float source, float mid)
 {
 	return (1.0f - mid) * source + mid;
 }
-
 
 bool
 GroundRoverPositionControl::control_position(const matrix::Vector2f &current_position,
@@ -250,8 +249,7 @@ GroundRoverPositionControl::control_position(const matrix::Vector2f &current_pos
 		matrix::Vector2f ground_speed_2d = {ground_speed(0), ground_speed(1)};
 
 		/* map mission_throttle to the upper half of the throttle range for forward only */
-				float mission_throttle = map_above(_parameters.throttle_cruise, gnd_throttle::HOLD);
-
+		float mission_throttle = map_above(_parameters.throttle_cruise, gnd_throttle::HOLD);
 
 		/* Just control the throttle */
 		if (_parameters.speed_control_mode == 1) {
@@ -491,27 +489,27 @@ GroundRoverPositionControl::task_main()
 	_control_task = -1;
 }
 
-int
+void
 GroundRoverPositionControl::task_main_trampoline(int argc, char *argv[])
 {
 	gnd_control::g_control = new GroundRoverPositionControl();
 
 	if (gnd_control::g_control == nullptr) {
 		warnx("OUT OF MEM");
-		return -1;
+		return;
 	}
 
 	/* only returns on exit */
 	gnd_control::g_control->task_main();
 	delete gnd_control::g_control;
 	gnd_control::g_control = nullptr;
-	return 0;
 }
 
 int
 GroundRoverPositionControl::start()
 {
 	ASSERT(_control_task == -1);
+	warn("Starting by marco");
 
 	/* start the task */
 	_control_task = px4_task_spawn_cmd("gnd_pos_ctrl",
@@ -520,6 +518,7 @@ GroundRoverPositionControl::start()
 					   1700,
 					   (px4_main_t)&GroundRoverPositionControl::task_main_trampoline,
 					   nullptr);
+	warn("done");
 
 	if (_control_task < 0) {
 		warn("task start failed");

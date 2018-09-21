@@ -213,6 +213,7 @@ void subscribe()
 
 void task_main(int argc, char *argv[])
 {
+//	PX4_INFO("TEST linux pwm out");
 	_is_running = true;
 
 	_perf_control_latency = perf_alloc(PC_ELAPSED, "linux_pwm_out control latency");
@@ -262,7 +263,7 @@ void task_main(int argc, char *argv[])
 	pwm_limit_init(&_pwm_limit);
 
 	while (!_task_should_exit) {
-
+//		PX4_ERR("PWM test1");
 		bool updated;
 		orb_check(_armed_sub, &updated);
 
@@ -274,13 +275,14 @@ void task_main(int argc, char *argv[])
 			_mixer_group->set_airmode(airmode);
 		}
 
-		int pret = px4_poll(_poll_fds, _poll_fds_num, 10);
-
+		int pret = px4_poll(_poll_fds, _poll_fds_num, 10); //pret=0;
+		PX4_ERR("_poll_fds_num %d", _poll_fds_num);
+		PX4_INFO("pret %d, _armed.in_esc_calibration_mode %d", pret, !_armed.in_esc_calibration_mode);
 		/* Timed out, do a periodic check for _task_should_exit. */
 		if (pret == 0 && !_armed.in_esc_calibration_mode) {
 			continue;
 		}
-
+		PX4_ERR("PWM test2");
 		/* This is undesirable but not much we can do. */
 		if (pret < 0) {
 			PX4_WARN("poll error %d, %d", pret, errno);
@@ -288,7 +290,7 @@ void task_main(int argc, char *argv[])
 			usleep(10000);
 			continue;
 		}
-
+		PX4_ERR("PWM test3");
 		/* get controls for required topics */
 		unsigned poll_id = 0;
 
@@ -303,6 +305,9 @@ void task_main(int argc, char *argv[])
 		}
 
 		if (_armed.in_esc_calibration_mode) {
+//			PX4_INFO("TEST linux pwm out");
+//			PX4_ERR("PWM test");
+
 			if (rc_channels_sub == -1) {
 				// only subscribe when really needed: esc calibration is not something we use regularily
 				rc_channels_sub = orb_subscribe(ORB_ID(rc_channels));
@@ -334,6 +339,7 @@ void task_main(int argc, char *argv[])
 			for (size_t i = _outputs.noutputs; i < _outputs.NUM_ACTUATOR_OUTPUTS; i++) {
 				_outputs.output[i] = NAN;
 			}
+//			PX4_INFO("host: %f %f %f %f", (double) _outputs.output[0], (double) _outputs.output[1], (double) _outputs.output[2], (double) _outputs.output[3]);
 
 			const uint16_t reverse_mask = 0;
 			uint16_t disarmed_pwm[actuator_outputs_s::NUM_ACTUATOR_OUTPUTS];

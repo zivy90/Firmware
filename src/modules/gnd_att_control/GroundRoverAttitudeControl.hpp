@@ -136,12 +136,12 @@ private:
 	void		parameters_update();
 
 	void		vehicle_control_mode_poll();
+	void		vehicle_status_poll();
 	void		manual_control_setpoint_poll();
 	void		vehicle_attitude_setpoint_poll();
 	void		battery_status_poll();
-	void		vehicle_status_poll();
 
-	static int	task_main_trampoline(int argc, char *argv[]);
+	static void	task_main_trampoline(int argc, char *argv[]);
 	void		task_main();
 
 };
